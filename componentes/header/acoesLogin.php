@@ -1,36 +1,58 @@
 <?php
 
-require('../../database/conexao.php');
+session_start();
 
-function realizarLogin($usuario, $senha, $conexao){
+    require('../../database/conexao.php');
 
-    $sql = "SELECT * FROM tbl_administrador WHERE usuario = '$usuario' AND senha = '$senha'";
+    ### FUNÇÕES DE LOGIN/LOGOUT ###
+    function realizarLogin($usuario, $senha, $conexao){
 
-    //echo $sql;exit;
+        $sql = "SELECT * FROM tbl_administrador
+                WHERE usuario = '$usuario' AND senha = '$senha'";
 
-    $resultado = mysqli_query($conexao, $sql);
+        $resultado = mysqli_query($conexao, $sql);
 
-    $dadosUsuario = mysqli_fetch_array($resultado);
+        $dadosUsuario = mysqli_fetch_array($resultado);
 
-    //var_dump($dadoUsuario);
+        if(isset($dadosUsuario["usuario"]) && isset($dadosUsuario["senha"]) && password_verify($senha, $dadosUsuario["senha"])){
 
-    if(isset($dadosUsuario["usuario"]) && isset($dadosUsuario["senha"])){
+            $_SESSION["usuarioId"] = $dadosUsuario["id"];
+            $_SESSION["nome"] = $dadosUsuario["nome"];
 
-        echo 'LOGADO!';
+            //echo $_SESSION["usuarioID"];
+            //echo $_SESSION["nome"];
 
-        // $_SESSION["usuario"] = $conexao->usuario;
-        // $_SESSION["senha"] = $conexao->senha;
+            header("location: ../../produtos/index.php");
 
-        // header("location: ../produtos/index.php");
-        // exit;
-    }else{
-        echo 'ALGO DEU ERRADO!';
+
+        }else{
+            echo 'ALGO DEU ERRADO!';
+            header("location: ../../produtos/index.php");
+        }
+
     }
 
-}
+    switch ($_POST["acao"]) {
+        case 'login':
+           
+            $usuario = $_POST["usuario"];
+            $senha = $_POST["senha"];
 
-realizarLogin('kelly', '12345', $conexao);
+            //var_dump($_POST);
 
+            realizarLogin($usuario, $senha, $conexao);
+
+            break;
+
+            case 'logout':
+               //echo 'FAZENDO LOGOUT!';
+               session_destroy();
+               header("location: ../../produtos/index.php");
+
+
+        default:
+            # code...
+            break;
+    }
 
 ?>
-
